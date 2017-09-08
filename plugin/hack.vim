@@ -26,32 +26,14 @@ if !executable(g:hack#hh_client)
   finish
 endif
 
-" Lookup the identifier under cursor.
-function! <SID>HackLookupCurrentIdentifier()
-  silent let result = system(
-  \ join(<SID>HackClientInvocation(['--identify-function', line('.').':'.col('.')])),
-  \ getline(1, '$'))
-  return substitute(result, '^\s*\(.\{-}\)\s*$', '\1', '') " strip ws
-endfunction
-
-" Main interface functions.
-function! hack#find_refs(fn)
-  call <SID>HackClientCall(['--find-refs', a:fn])
-endfunction
-
-function! hack#search(full_lookup, name)
-  let name = a:name
-  if name == ''
-    " Look up full identifier.
-    if a:full_lookup
-      let name = <SID>HackLookupCurrentIdentifier()
-    endif
-    " Use current word.
-    if name == ''
-      let name = expand('<cword>')
-    endif
-  end
-  call <SID>HackClientCall(['--search', name])
+" Returns command line for calling hack.
+function! <SID>HackClientInvocation(extra_args)
+  return [
+  \ g:hack#hh_client,
+  \ '--from', 'vim',
+  \ '--retries', '1',
+  \ '--retry-if-init', 'false'
+  \ ] + a:extra_args
 endfunction
 
 " Get the Hack type at the current cursor position.
@@ -108,16 +90,10 @@ function! hack#format(from, to)
   execute a:from.','.a:to.' ! '.g:hack#hh_format.
     \ ' --from '.frombyte.' --to '.tobyte.
     \ ' --root '.g:hack#root.' '.expand('%:p')
-  let tmp = g:hack#enable
-  " Disable auto checking
-  let g:hack#enable = 0
   silent write
-  let g:hack#enable = tmp
 endfunction
 
 " Commands and auto-typecheck.
 command! HackType   call hack#get_type()
 command! HackGotoDef call hack#goto_def()
 command! -range=% HackFormat call hack#format(<line1>, <line2>)
-command! -nargs=1 HackFindRefs call hack#find_refs(<q-args>)
-command! -nargs=? -bang HackSearch call hack#search('<bang>' == '!', <q-args>)

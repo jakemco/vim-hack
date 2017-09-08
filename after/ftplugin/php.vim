@@ -32,12 +32,3 @@ endif
 if !executable(g:hack#hh_client)
   finish
 endif
-
-" Omnicompletion.
-if !exists("g:hack#omnifunc")
-  let g:hack#omnifunc = 1
-endif
-
-if exists('&omnifunc') && g:hack#omnifunc
-  setl omnifunc=hackcomplete#Complete
-endif

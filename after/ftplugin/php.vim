@@ -11,6 +11,8 @@
 " grant of patent rights can be found in the PATENTS file in the same
 " directory.
 
+setlocal comments=s1:/*,mb:*,ex:*/,://,:#
+
 if exists("b:did_ftplugin_hack")
   finish
 endif
